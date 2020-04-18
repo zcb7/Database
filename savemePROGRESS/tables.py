@@ -1,7 +1,7 @@
 from flask_table import Table, Col, LinkCol
 
 class Results(Table):
-    """user_id = Col('UserId')"""
+    #user_id = Col('UserId')
     username = Col('UserName')
     password = Col('Password')
     edit = LinkCol('Edit', 'edit', url_kwargs=dict(id='user_id'))

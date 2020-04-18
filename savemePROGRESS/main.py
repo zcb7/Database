@@ -2,12 +2,14 @@
 
 #from app import app
 #from db_setup import init_db, db_session
-from forms import SearchForm, EditForm
+from forms import SearchForm, EditForm, LoginForm
 from flask import Flask, flash, render_template, request, redirect
+from flask_login import LoginManager, login_required, login_user, logout_user, current_user
+from flask_bcrypt import Bcrypt
 #from models import Userdata
 from tables import Results
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, exists
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -30,31 +32,73 @@ def init_db():
 
 class Userdata(db.Model):
 
-    __tablename__ = "userdata"
+    __tablename__ = 'userdata'
 
-    user_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String)
     password = db.Column(db.String)
-    # authenticated = db.Column(db.Boolean, default=False)
+    authenticated = db.Column(db.Boolean, default=False)
+
+    def is_active(self):
+        """True, as all users are active."""
+        return True
+
+    def get_id(self):
+        """Return the username to satify Flask-Login's requirements."""
+        return self.username
+
+    def is_authenticated(self):
+        """Return True if the user is authenticated."""
+        return self.authenticated
+
+    def is_anonymous(self):
+        """False, as anonymous users aren't supported."""
+        return False
 
 init_db()
+login_manager = LoginManager()
+login_manager.init_app(app)
+bcrypt = Bcrypt()
 
-def logon(loginName):
-    results = []
-    login_string = loginName
-
-    if login_string == loginName:
-        flash('Gay')
-    return redirect('/')
+@login_manager.user_loader
+def load_user(user_id):
+    return db_session.query(Userdata).filter(Userdata.username == user_id).first()
+    #return Userdata.get(user_id)
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
     
-    search = EditForm(request.form)
+    print(db)
+    form = LoginForm()
+
+    if form.validate_on_submit():
+        #user = Userdata.query.get(form.username.data)
+        user = db_session.query(Userdata).filter(Userdata.username == form.username.data).scalar()
+        #password = db_session.query(Userdata).filter(Userdata.password == form.password.data).scalar()
+        if user != None:
+            #password = db_session.query(Userdata).filter(user.password == form.password.data).scalar()
+            #if db_session.query(Userdata).filter(Userdata.password == form.)
+            #if bcrypt.check_password_hash(user.password, form.password.data):
+            #if password != None:
+            if str(user.password) == str(form.password.data):
+                user.authenticated = True
+                db_session.add(user)
+                db_session.commit()
+                login_user(user, remember=True)
+                flash('Success!')
+                return redirect('/')
+            #pw_hash = bcrypt.generate_password_hash(form.password.data)
+            else:
+                flash(form.password.data)
+                flash(user.password)
+                return redirect('/')
+        else:
+            flash('User not found.')
+    """
     if request.method == 'POST':
-        return logon(search)
-    
-    return render_template('login.html', form=search)
+        return logon(form)
+    """
+    return render_template('login.html', form=form)
 
 @app.route('/search', methods=['GET', 'POST'])
 def index():
@@ -99,11 +143,18 @@ def new_user():
 
     form = EditForm(request.form)
 
-    if request.method == 'POST' and form.validate():
+    #if request.method == 'POST' and form.validate():
+    if form.validate_on_submit():
         userdata = Userdata()
-        save_changes(userdata, form, new=True)
-        flash('User created successfully!')
-        return redirect('/')
+        if userdata:
+            #if Userdata.query.filter(userdata.username == form.username.data) != None:
+            if db_session.query(Userdata).filter(Userdata.username == form.username.data).scalar() != None:
+                flash('That username is taken. Please try again.')
+                return redirect('/new_user')
+            else:
+                save_changes(userdata, form, new=True)
+                flash('User created successfully!')
+                return redirect('/')
 
     return render_template('new_user.html', form=form)
 
@@ -135,7 +186,8 @@ def delete(id):
 
     if userdata:
         form = EditForm(formdata=request.form, obj=userdata)
-        if request.method == 'POST' and form.validate():
+        #if request.method == 'POST' and form.validate():
+        if form.validate_on_submit():
             db_session.delete(userdata)
             db_session.commit()
 

@@ -1,6 +1,7 @@
 # forms.py
-
-from wtforms import Form, StringField, SelectField, validators
+from flask_wtf import Form
+from wtforms import StringField, TextField, PasswordField, SelectField, validators
+from wtforms.validators import DataRequired
 
 class SearchForm(Form):
 
@@ -12,5 +13,10 @@ class SearchForm(Form):
 
 class EditForm(Form):
 
-    username = StringField('Username')
-    password = StringField('Password')
+    username = StringField('Username') # validators=[DataRequired()])
+    password = StringField('Password') # validators=[DataRequired()])
+
+class LoginForm(Form):
+    """Form class for user login."""
+    username = TextField('Username', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
