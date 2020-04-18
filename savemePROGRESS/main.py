@@ -78,14 +78,15 @@ def login():
         if user != None:
             #password = db_session.query(Userdata).filter(user.password == form.password.data).scalar()
             #if db_session.query(Userdata).filter(Userdata.password == form.)
-            #if bcrypt.check_password_hash(user.password, form.password.data):
+            #password = str(user.password)
+            #if bcrypt.check_password_hash(password, form.password.data):
             #if password != None:
             if str(user.password) == str(form.password.data):
                 user.authenticated = True
                 db_session.add(user)
                 db_session.commit()
                 login_user(user, remember=True)
-                flash('Success!')
+                flash('Logged in!')
                 return redirect('/')
             #pw_hash = bcrypt.generate_password_hash(form.password.data)
             else:
@@ -99,6 +100,16 @@ def login():
         return logon(form)
     """
     return render_template('login.html', form=form)
+@app.route("/logout", methods=["GET"])
+@login_required
+def logout():
+    """Logout the current user."""
+    user = current_user
+    user.authenticated = False
+    db_session.add(user)
+    db_session.commit()
+    logout_user()
+    return render_template("logout.html")
 
 @app.route('/search', methods=['GET', 'POST'])
 def index():
