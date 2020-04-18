@@ -148,11 +148,31 @@ def search_results(search):
         table = Results(results)
         table.border = True
         return render_template('results.html', table=table)
-
+"""
 @app.route('/new_user', methods=['GET', 'POST'])
 def new_user():
 
     form = EditForm(request.form)
+
+    #if request.method == 'POST' and form.validate():
+    if form.validate_on_submit():
+        userdata = Userdata()
+        if userdata:
+            #if Userdata.query.filter(userdata.username == form.username.data) != None:
+            if db_session.query(Userdata).filter(Userdata.username == form.username.data).scalar() != None:
+                flash('That username is taken. Please try again.')
+                return redirect('/new_user')
+            else:
+                save_changes(userdata, form, new=True)
+                flash('User created successfully!')
+                return redirect('/')
+
+    return render_template('new_user.html', form=form)
+"""
+@app.route('/new_user', methods=['GET', 'POST'])
+def new_user():
+
+    form = LoginForm()
 
     #if request.method == 'POST' and form.validate():
     if form.validate_on_submit():
