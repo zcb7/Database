@@ -1,3 +1,4 @@
+"""
 from app import db
 
 class Userdata(db.Model):
@@ -7,6 +8,6 @@ class Userdata(db.Model):
     user_id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String)
     password = db.Column(db.String)
-
+"""
 
 

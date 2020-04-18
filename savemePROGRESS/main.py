@@ -35,15 +35,24 @@ class Userdata(db.Model):
     user_id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String)
     password = db.Column(db.String)
+    # authenticated = db.Column(db.Boolean, default=False)
 
 init_db()
+
+def logon(loginName):
+    results = []
+    login_string = loginName
+
+    if login_string == loginName:
+        flash('Gay')
+    return redirect('/')
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
     
     search = EditForm(request.form)
     if request.method == 'POST':
-        return search_results(search)
+        return logon(search)
     
     return render_template('login.html', form=search)
 
