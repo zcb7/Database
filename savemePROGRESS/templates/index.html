@@ -1,7 +1,6 @@
-<doctype html>
-<head>
-    <title>Search Scores</title>
-</head>
+{% extends "base.html" %}
+{% block title %}Search Scores{% endblock %}
+{% block content %}
 
 <h2>Search Scores</h2>
 
@@ -9,11 +8,8 @@
 <form method=post>
   <dl>
     {{ render_field(form.select) }}
-    <p>
     {{ render_field(form.search) }}
   </dl>
-
-  <p><p>
 
   {% with messages = get_flashed_messages() %}
     {% if messages %}
@@ -24,5 +20,7 @@
       </ul>
     {% endif %}
   {% endwith %}
+
   <p><input type=submit value=Search>
 </form>
+{% endblock %}
