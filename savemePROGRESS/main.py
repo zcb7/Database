@@ -2,7 +2,7 @@
 
 #from app import app
 #from db_setup import init_db, db_session
-from forms import SearchForm, EditForm, LoginForm
+from forms import SearchForm, EditForm, LoginForm, PasswordForm
 from flask import Flask, flash, render_template, request, redirect
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 from flask_bcrypt import Bcrypt
@@ -189,6 +189,7 @@ def new_user():
 
     return render_template('new_user.html', form=form)
 
+"""
 @app.route('/item/<int:id>', methods=['GET', 'POST'])
 def edit(id):
 
@@ -206,6 +207,23 @@ def edit(id):
         return render_template('edit_user.html', form=form)
     else:
         return 'Error loading #{id}'.format(id=id)
+"""
+
+@app.route('/edit', methods=['GET', 'POST'])
+@login_required
+def edit():
+
+    user = current_user
+    form = PasswordForm()
+
+    if request.method == 'POST' and form.validate():
+        user.password = form.password.data
+        db_session.add(user)
+        db_session.commit()
+        flash('User updated successfully!')
+        return redirect('/')
+
+    return render_template('edit_user.html', form=form)
 
 
 @app.route('/delete/<int:id>', methods=['GET', 'POST'])

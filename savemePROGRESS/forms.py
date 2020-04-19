@@ -10,7 +10,6 @@ class SearchForm(Form):
     select = SelectField('Search by:', choices=choices) 
     search = StringField('')
 
-
 class EditForm(Form):
 
     username = StringField('Username') # validators=[DataRequired()])
@@ -20,3 +19,7 @@ class LoginForm(Form):
     """Form class for user login."""
     username = TextField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
+
+class PasswordForm(Form):
+
+    password = PasswordField('New Password', validators=[DataRequired()])
