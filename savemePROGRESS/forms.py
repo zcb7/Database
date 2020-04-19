@@ -5,9 +5,10 @@ from wtforms.validators import DataRequired
 
 class SearchForm(Form):
 
-    choices = [('User_id', 'User_id'),
-               ('Username', 'Username')]
-    select = SelectField('Search by:', choices=choices) 
+    choices = [('Blue', 'Blue'),
+               ('Red', 'Red'),
+               ('All', 'All')]
+    select = SelectField('Search for:', choices=choices) 
     search = StringField('')
 
 class EditForm(Form):
@@ -35,4 +36,4 @@ class NewUserForm(Form):
 class DeleteForm(Form):
 
     username = StringField('Username', validators=[DataRequired()])
-    password = StringField('Password') # validators=[DataRequired()])
+    #password = StringField('Password') # validators=[DataRequired()])

@@ -9,7 +9,7 @@ from flask_bcrypt import Bcrypt
 #from models import Userdata
 from tables import Results
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import create_engine, exists, table, column, Integer, ForeignKey
+from sqlalchemy import create_engine, exists, table, column, Integer, ForeignKey, union_all
 from sqlalchemy.orm import scoped_session, sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -67,16 +67,12 @@ class BlueScores(db.Model):
     username = db.Column(db.String, primary_key=True) # db.ForeignKey('userdata.username'))
     highScore = db.Column(db.Integer) # primary_key=True)
 
-
-
 class RedScores(db.Model):
 
     __tablename__ = 'redScores'
 
     username = db.Column(db.String, primary_key=True) #, db.ForeignKey('userdata.username'))
     highScore = db.Column(db.Integer) #, primary_key=True)
-
-
 
 init_db()
 login_manager = LoginManager()
@@ -146,19 +142,29 @@ def search_results(search):
 
     if search_string:
         
-        if search.data['select'] == 'Username':
-            qry = db_session.query(Userdata).filter(
-                Userdata.username.contains(search_string))
+        if search.data['select'] == 'Blue':
+            qry = db_session.query(BlueScores).filter(
+                BlueScores.username.contains(search_string))
             results = qry.all()
-        elif search.data['select'] == 'User_id':
-            qry = db_session.query(Userdata).filter(
-                Userdata.user_id.contains(search_string))
+        elif search.data['select'] == 'Red':
+            qry = db_session.query(RedScores).filter(
+                RedScores.username.contains(search_string))
+            results = qry.all()
+        elif search.data['select'] == 'All':
+            q1 = db_session.query(RedScores).filter(
+                RedScores.username.contains(search_string))
+            q2 = db_session.query(BlueScores).filter(
+                BlueScores.username.contains(search_string))
+            qry = q1.union_all(q2)
             results = qry.all()
         else:
             qry = db_session.query(Userdata)
             results = qry.all()
     else:
-        qry = db_session.query(Userdata)
+        q1 = db_session.query(BlueScores)
+        q2 = db_session.query(RedScores)
+        qry = q1.union_all(q2)
+
         results = qry.all()
 
     if not results:
@@ -168,40 +174,17 @@ def search_results(search):
         table = Results(results)
         table.border = True
         return render_template('results.html', table=table)
-"""
-@app.route('/new_user', methods=['GET', 'POST'])
-def new_user():
-
-    form = NewUserForm()
-
-    #if request.method == 'POST' and form.validate():
-    if form.validate_on_submit():
-        userdata = Userdata()
-        if userdata:
-            #if Userdata.query.filter(userdata.username == form.username.data) != None:
-            if db_session.query(Userdata).filter(Userdata.username == form.username.data).scalar() != None:
-                flash('That username is taken. Please try again.')
-                return redirect('/new_user')
-            else:
-                save_changes(userdata, form, new=True)
-                flash('User created successfully!')
-                return redirect('/')
-
-    return render_template('new_user.html', form=form)
-"""
 
 @app.route('/new_user', methods=['GET', 'POST'])
 def new_user():
 
     form = NewUserForm()
 
-    #if request.method == 'POST' and form.validate():
     if form.validate_on_submit():
         userdata = Userdata()
         bluedata = BlueScores()
         reddata = RedScores()
         if userdata:
-            #if Userdata.query.filter(userdata.username == form.username.data) != None:
             if db_session.query(Userdata).filter(Userdata.username == form.username.data).scalar() != None:
                 flash('That username is taken. Please try again.')
                 return redirect('/new_user')
@@ -221,7 +204,7 @@ def new_user():
                     flash('User created successfully!')
                     return redirect('/')
                 else:
-                    flash('Gay')
+                    flash('Hmmmm..')
                     return redirect('/new_user')
 
     return render_template('new_user.html', form=form)
@@ -247,18 +230,12 @@ def edit():
 def delete():
 
     user = current_user
-    #blue = db_session.query(BlueScores).filter(BlueScores.username == user.username)
     form = DeleteForm()
 
-    if form.validate_on_submit(): #and user.is_authenticated:
+    if form.validate_on_submit():
         
         db_session.delete(user)
-        #blue = db_session.query(BlueScores).filter(BlueScores.username == user.username).first()
-        #db_session.delete(blue)
         db_session.commit()
-        #flash(user.username)
-        #flash('ran')
-        #return redirect('/')
         
         if db_session.query(BlueScores).filter(BlueScores.username == user.username).scalar() != None:
             blue = db_session.query(BlueScores).filter(BlueScores.username == user.username).first()
@@ -274,8 +251,6 @@ def delete():
             flash('User deleted successfully!')
             return redirect('/')
         
-    #flash('User deleted successfully!')
-    #return redirect('/')
     return render_template('delete_user.html', form=form)
 
 def save_changes(userdata, form, new=False):
