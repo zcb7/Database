@@ -95,11 +95,8 @@ def login():
                 return redirect('/')
         else:
             flash('User not found.')
-    """
-    if request.method == 'POST':
-        return logon(form)
-    """
     return render_template('login.html', form=form)
+    
 @app.route("/logout", methods=["GET"])
 @login_required
 def logout():
@@ -148,27 +145,7 @@ def search_results(search):
         table = Results(results)
         table.border = True
         return render_template('results.html', table=table)
-"""
-@app.route('/new_user', methods=['GET', 'POST'])
-def new_user():
 
-    form = EditForm(request.form)
-
-    #if request.method == 'POST' and form.validate():
-    if form.validate_on_submit():
-        userdata = Userdata()
-        if userdata:
-            #if Userdata.query.filter(userdata.username == form.username.data) != None:
-            if db_session.query(Userdata).filter(Userdata.username == form.username.data).scalar() != None:
-                flash('That username is taken. Please try again.')
-                return redirect('/new_user')
-            else:
-                save_changes(userdata, form, new=True)
-                flash('User created successfully!')
-                return redirect('/')
-
-    return render_template('new_user.html', form=form)
-"""
 @app.route('/new_user', methods=['GET', 'POST'])
 def new_user():
 
@@ -189,26 +166,6 @@ def new_user():
 
     return render_template('new_user.html', form=form)
 
-"""
-@app.route('/item/<int:id>', methods=['GET', 'POST'])
-def edit(id):
-
-    qry = db_session.query(Userdata).filter(
-                Userdata.user_id==id)
-    userdata = qry.first()
-
-    if userdata:
-        form = EditForm(formdata=request.form, obj=userdata)
-        if request.method == 'POST' and form.validate():
-            # save edits
-            save_changes(userdata, form)
-            flash('User updated successfully!')
-            return redirect('/')
-        return render_template('edit_user.html', form=form)
-    else:
-        return 'Error loading #{id}'.format(id=id)
-"""
-
 @app.route('/edit', methods=['GET', 'POST'])
 @login_required
 def edit():
@@ -225,26 +182,20 @@ def edit():
 
     return render_template('edit_user.html', form=form)
 
+@app.route('/delete', methods=['GET', 'POST'])
+@login_required
+def delete():
 
-@app.route('/delete/<int:id>', methods=['GET', 'POST'])
-def delete(id):
+    user = current_user
+    form = EditForm()
 
-    qry = db_session.query(Userdata).filter(
-        Userdata.user_id==id)
-    userdata = qry.first()
+    if form.validate_on_submit():
+        db_session.delete(user)
+        db_session.commit()
 
-    if userdata:
-        form = EditForm(formdata=request.form, obj=userdata)
-        #if request.method == 'POST' and form.validate():
-        if form.validate_on_submit():
-            db_session.delete(userdata)
-            db_session.commit()
-
-            flash('User deleted successfully!')
-            return redirect('/')
-        return render_template('delete_user.html', form=form)
-    else:
-        return 'Error deleting #{id}'.format(id=id)
+        flash('User deleted successfully!')
+        return redirect('/')
+    return render_template('delete_user.html', form=form)
 
 def save_changes(userdata, form, new=False):
 
