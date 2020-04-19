@@ -2,15 +2,15 @@
 
 #from app import app
 #from db_setup import init_db, db_session
-from forms import SearchForm, EditForm, LoginForm, PasswordForm
+from forms import SearchForm, EditForm, LoginForm, PasswordForm, NewUserForm, DeleteForm
 from flask import Flask, flash, render_template, request, redirect
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 from flask_bcrypt import Bcrypt
 #from models import Userdata
 from tables import Results
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import create_engine, exists
-from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy import create_engine, exists, table, column, Integer, ForeignKey
+from sqlalchemy.orm import scoped_session, sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
 
 app = Flask(__name__)
@@ -34,8 +34,8 @@ class Userdata(db.Model):
 
     __tablename__ = 'userdata'
 
-    user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    username = db.Column(db.String)
+    #user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    username = db.Column(db.String, primary_key=True)
     password = db.Column(db.String)
     authenticated = db.Column(db.Boolean, default=False)
 
@@ -54,6 +54,29 @@ class Userdata(db.Model):
     def is_anonymous(self):
         """False, as anonymous users aren't supported."""
         return False
+    
+    #children = db.relationship('BlueScores', backref='owner')
+    #childrens = db.relationship('RedScores', backref='owner')
+    #blueChild = relationship('BlueScores', backref='BlueScores.username')
+    #redChild = relationship('RedScores', backref='RedScores.username')
+
+class BlueScores(db.Model):
+
+    __tablename__ = 'blueScores'
+
+    username = db.Column(db.String, primary_key=True) # db.ForeignKey('userdata.username'))
+    highScore = db.Column(db.Integer) # primary_key=True)
+
+
+
+class RedScores(db.Model):
+
+    __tablename__ = 'redScores'
+
+    username = db.Column(db.String, primary_key=True) #, db.ForeignKey('userdata.username'))
+    highScore = db.Column(db.Integer) #, primary_key=True)
+
+
 
 init_db()
 login_manager = LoginManager()
@@ -96,7 +119,7 @@ def login():
         else:
             flash('User not found.')
     return render_template('login.html', form=form)
-    
+
 @app.route("/logout", methods=["GET"])
 @login_required
 def logout():
@@ -145,11 +168,11 @@ def search_results(search):
         table = Results(results)
         table.border = True
         return render_template('results.html', table=table)
-
+"""
 @app.route('/new_user', methods=['GET', 'POST'])
 def new_user():
 
-    form = LoginForm()
+    form = NewUserForm()
 
     #if request.method == 'POST' and form.validate():
     if form.validate_on_submit():
@@ -163,6 +186,43 @@ def new_user():
                 save_changes(userdata, form, new=True)
                 flash('User created successfully!')
                 return redirect('/')
+
+    return render_template('new_user.html', form=form)
+"""
+
+@app.route('/new_user', methods=['GET', 'POST'])
+def new_user():
+
+    form = NewUserForm()
+
+    #if request.method == 'POST' and form.validate():
+    if form.validate_on_submit():
+        userdata = Userdata()
+        bluedata = BlueScores()
+        reddata = RedScores()
+        if userdata:
+            #if Userdata.query.filter(userdata.username == form.username.data) != None:
+            if db_session.query(Userdata).filter(Userdata.username == form.username.data).scalar() != None:
+                flash('That username is taken. Please try again.')
+                return redirect('/new_user')
+            else:
+                if form.data['select'] == 'Blue':
+                    bluedata.username = form.username.data
+                    db_session.add(bluedata)
+                    db_session.commit()
+                    save_changes(userdata, form, new=True)
+                    flash('User created successfully!')
+                    return redirect('/')
+                elif form.data['select'] == 'Red':
+                    reddata.username = form.username.data
+                    db_session.add(reddata)
+                    db_session.commit()
+                    save_changes(userdata, form, new=True)
+                    flash('User created successfully!')
+                    return redirect('/')
+                else:
+                    flash('Gay')
+                    return redirect('/new_user')
 
     return render_template('new_user.html', form=form)
 
@@ -187,14 +247,35 @@ def edit():
 def delete():
 
     user = current_user
-    form = EditForm()
+    #blue = db_session.query(BlueScores).filter(BlueScores.username == user.username)
+    form = DeleteForm()
 
-    if form.validate_on_submit():
+    if form.validate_on_submit(): #and user.is_authenticated:
+        
         db_session.delete(user)
+        #blue = db_session.query(BlueScores).filter(BlueScores.username == user.username).first()
+        #db_session.delete(blue)
         db_session.commit()
-
-        flash('User deleted successfully!')
-        return redirect('/')
+        #flash(user.username)
+        #flash('ran')
+        #return redirect('/')
+        
+        if db_session.query(BlueScores).filter(BlueScores.username == user.username).scalar() != None:
+            blue = db_session.query(BlueScores).filter(BlueScores.username == user.username).first()
+            db_session.delete(blue)
+            db_session.commit()
+            flash('User deleted successfully!')
+            return redirect('/')
+        
+        elif db_session.query(RedScores).filter(RedScores.username == user).scalar() != None:
+            red = db_session.query(RedScores).filter(RedScores.username == user.username).first()
+            db_session.delete(red)
+            db_session.commit()
+            flash('User deleted successfully!')
+            return redirect('/')
+        
+    #flash('User deleted successfully!')
+    #return redirect('/')
     return render_template('delete_user.html', form=form)
 
 def save_changes(userdata, form, new=False):

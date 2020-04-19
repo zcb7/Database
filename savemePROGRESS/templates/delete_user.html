@@ -6,6 +6,11 @@
 <form method=post>
     <dl>
         {{ form.csrf_token }}
+        {{ render_field(form.username) }}
     </dl>
     <p><input type=submit value=Delete>
 </form>
+
+{% if current_user.is_authenticated %}
+  Hi {{ current_user.username }}!
+{% endif %}

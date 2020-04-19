@@ -23,3 +23,16 @@ class LoginForm(Form):
 class PasswordForm(Form):
 
     password = PasswordField('New Password', validators=[DataRequired()])
+
+class NewUserForm(Form):
+
+    choices = [('Blue', 'Blue'),
+               ('Red', 'Red')]
+    select = SelectField('Select Team:', choices=choices)
+    username = TextField('Username', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+
+class DeleteForm(Form):
+
+    username = StringField('Username', validators=[DataRequired()])
+    password = StringField('Password') # validators=[DataRequired()])
