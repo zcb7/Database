@@ -84,6 +84,11 @@ def load_user(user_id):
     return db_session.query(Userdata).filter(Userdata.username == user_id).first()
     #return Userdata.get(user_id)
 
+@login_manager.unauthorized_handler
+def unauthorized_callback():
+    flash('You must be logged in to access that page.')
+    return redirect('/')
+
 @app.route('/', methods=['GET', 'POST'])
 def login():
     

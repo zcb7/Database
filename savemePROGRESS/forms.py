@@ -35,5 +35,5 @@ class NewUserForm(Form):
 
 class DeleteForm(Form):
 
-    username = StringField('Username', validators=[DataRequired()])
+    username = StringField('Username') # validators=[DataRequired()])
     #password = StringField('Password') # validators=[DataRequired()])
