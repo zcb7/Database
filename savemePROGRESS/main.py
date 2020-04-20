@@ -1,12 +1,9 @@
 # main.py
 
-#from app import app
-#from db_setup import init_db, db_session
 from forms import SearchForm, EditForm, LoginForm, PasswordForm, NewUserForm, DeleteForm
 from flask import Flask, flash, render_template, request, redirect
 from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 from flask_bcrypt import Bcrypt
-#from models import Userdata
 from tables import Results
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine, exists, table, column, Integer, ForeignKey, union_all
@@ -38,6 +35,9 @@ class Userdata(db.Model):
     username = db.Column(db.String, primary_key=True)
     password = db.Column(db.String)
     authenticated = db.Column(db.Boolean, default=False)
+    blue = db.Column(db.Boolean, default=False)
+    red = db.Column(db.Boolean, default=False)
+    
 
     def is_active(self):
         """True, as all users are active."""
@@ -50,15 +50,16 @@ class Userdata(db.Model):
     def is_authenticated(self):
         """Return True if the user is authenticated."""
         return self.authenticated
+    def is_blue(self):
+        return self.blue
+    
+    def is_red(self):
+        return self.red
 
     def is_anonymous(self):
         """False, as anonymous users aren't supported."""
         return False
     
-    #children = db.relationship('BlueScores', backref='owner')
-    #childrens = db.relationship('RedScores', backref='owner')
-    #blueChild = relationship('BlueScores', backref='BlueScores.username')
-    #redChild = relationship('RedScores', backref='RedScores.username')
 
 class BlueScores(db.Model):
 
@@ -82,7 +83,6 @@ bcrypt = Bcrypt()
 @login_manager.user_loader
 def load_user(user_id):
     return db_session.query(Userdata).filter(Userdata.username == user_id).first()
-    #return Userdata.get(user_id)
 
 @login_manager.unauthorized_handler
 def unauthorized_callback():
@@ -100,11 +100,8 @@ def login():
         user = db_session.query(Userdata).filter(Userdata.username == form.username.data).scalar()
         #password = db_session.query(Userdata).filter(Userdata.password == form.password.data).scalar()
         if user != None:
-            #password = db_session.query(Userdata).filter(user.password == form.password.data).scalar()
             #if db_session.query(Userdata).filter(Userdata.password == form.)
-            #password = str(user.password)
             #if bcrypt.check_password_hash(password, form.password.data):
-            #if password != None:
             if str(user.password) == str(form.password.data):
                 user.authenticated = True
                 db_session.add(user)
@@ -112,7 +109,6 @@ def login():
                 login_user(user, remember=True)
                 flash('Logged in!')
                 return redirect('/')
-            #pw_hash = bcrypt.generate_password_hash(form.password.data)
             else:
                 flash(form.password.data)
                 flash(user.password)
@@ -202,6 +198,7 @@ def new_user():
                     bluedata.username = form.username.data
                     db_session.add(bluedata)
                     db_session.commit()
+                    userdata.blue = True
                     save_changes(userdata, form, new=True)
                     flash('User created successfully!')
                     return redirect('/')
@@ -209,6 +206,7 @@ def new_user():
                     reddata.username = form.username.data
                     db_session.add(reddata)
                     db_session.commit()
+                    userdata.red = True
                     save_changes(userdata, form, new=True)
                     flash('User created successfully!')
                     return redirect('/')
@@ -253,7 +251,7 @@ def delete():
             flash('User deleted successfully!')
             return redirect('/')
         
-        elif db_session.query(RedScores).filter(RedScores.username == user).scalar() != None:
+        elif db_session.query(RedScores).filter(RedScores.username == user.username).scalar() != None:
             red = db_session.query(RedScores).filter(RedScores.username == user.username).first()
             db_session.delete(red)
             db_session.commit()

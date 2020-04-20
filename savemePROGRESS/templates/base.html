@@ -21,14 +21,35 @@
            border: 1px solid #ccc;
            background-color: #f3f3f3;
         }
+        
         body
         {
             /*
-            background-image: url(bigrank.PNG);
+            background-image: url(http://www.theappguruz.com/app/uploads/2015/06/give-shadow.png);
             background-repeat: repeat;
             */
         }
+        
     </style>
+
+    {% if current_user.is_blue %}
+    <style>
+        body
+        {
+            background-color: blue;
+        }
+    </style>
+    {% endif %}
+
+    {% if current_user.red == True %}
+    <style>
+        body
+        {
+            background-color: red;
+        }
+    </style>
+    {% endif %}
+    
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
