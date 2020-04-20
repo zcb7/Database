@@ -21,20 +21,26 @@
            border: 1px solid #ccc;
            background-color: #f3f3f3;
         }
+        body
+        {
+            /*
+            background-image: url(bigrank.PNG);
+            background-repeat: repeat;
+            */
+        }
     </style>
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="#">Game</a>
+        <a class="navbar-brand" href="{{ url_for('.game') }}">Game</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
           <div class="navbar-nav">
             <a class="nav-item nav-link" href="{{ url_for('.login') }}">Login<span class="sr-only">(current)</span></a>
-            <a class="nav-item nav-link" href="{{ url_for('.new_user') }}">New User</a>
-            <a class="nav-item nav-link" href="{{ url_for('.index') }}">Search</a>
             <a class="nav-item nav-link" href="{{ url_for('.logout') }}">Logout</a>
+            <a class="nav-item nav-link" href="{{ url_for('.index') }}">Search</a>
             <a class="nav-item nav-link" href="{{ url_for('.edit') }}">Change Password</a>
             <a class="nav-item nav-link" href="{{ url_for('.delete') }}">Delete Account</a>
           </div>

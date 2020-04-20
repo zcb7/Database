@@ -121,6 +121,10 @@ def login():
             flash('User not found.')
     return render_template('login.html', form=form)
 
+@app.route("/game", methods=["GET"])
+@login_required
+def game():
+    return render_template("game.html")
 @app.route("/logout", methods=["GET"])
 @login_required
 def logout():
