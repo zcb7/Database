@@ -110,8 +110,8 @@ def login():
                 flash('Logged in!')
                 return redirect('/')
             else:
-                flash(form.password.data)
-                flash(user.password)
+                #flash(form.password.data)
+                #flash(user.password)
                 return redirect('/')
         else:
             flash('User not found.')
@@ -121,6 +121,7 @@ def login():
 @login_required
 def game():
     return render_template("game.html")
+
 @app.route("/logout", methods=["GET"])
 @login_required
 def logout():
