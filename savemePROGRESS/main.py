@@ -24,14 +24,12 @@ Base = declarative_base()
 Base.query = db_session.query_property()
 
 def init_db():
-    #import models
     Base.metadata.create_all(bind=engine)
 
 class Userdata(db.Model):
 
     __tablename__ = 'userdata'
 
-    #user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String, primary_key=True)
     password = db.Column(db.String)
     authenticated = db.Column(db.Boolean, default=False)
@@ -50,17 +48,17 @@ class Userdata(db.Model):
     def is_authenticated(self):
         """Return True if the user is authenticated."""
         return self.authenticated
+
     def is_blue(self):
         return self.blue
-    
+        
     def is_red(self):
         return self.red
-
+        
     def is_anonymous(self):
         """False, as anonymous users aren't supported."""
         return False
     
-
 class BlueScores(db.Model):
 
     __tablename__ = 'blueScores'

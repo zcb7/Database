@@ -8,6 +8,7 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <title>{% block title %}{% endblock %}</title>
+
     <style>
         .container 
         {
@@ -33,39 +34,35 @@
             color:rgb(218, 198, 18);
             
         }
-        
-        body
-        {
 
-            background-image: url(http://www.theappguruz.com/app/uploads/2015/06/give-shadow.png);
-            background-repeat: repeat;
+        .game:active
+        {
+            color:rgb(218, 198, 18);
             
         }
-        
-    </style>
 
-    {% if current_user.is_blue %}
-    <style>
-        body
+        .blue
         {
             background-image: url(https://i.imgur.com/QXu1OIP.png);
             background-repeat: repeat;
         }
-    </style>
-    {% endif %}
 
-    {% if current_user.red == True %}
-    <style>
-        body
+        .red
         {
             background-image: url(https://i.imgur.com/gKxUn5W.png);
             background-repeat: repeat;
         }
+
+        .default
+        {
+            background-image: url(http://www.theappguruz.com/app/uploads/2015/06/give-shadow.png);
+            background-repeat: repeat;
+        }
     </style>
-    {% endif %}
-    
+   
   </head>
-  <body>
+  
+  <body {% if current_user.blue == True %} class="blue" {% elif current_user.red == True %} class="red" {% else %} class="default" {% endif %}>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <a class="game" href="{{ url_for('.game') }}">
         <svg class="bi bi-plug" width="2em" height="2em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -83,6 +80,12 @@
             <a class="nav-item nav-link" href="{{ url_for('.index') }}">Search</a>
             <a class="nav-item nav-link" href="{{ url_for('.edit') }}">Change Password</a>
             <a class="nav-item nav-link" href="{{ url_for('.delete') }}">Delete Account</a>
+            <a class="nav-link disabled" style="color:rgb(218, 198, 18)" href="#" tabindex="-1" aria-disabled="true">
+                {% if current_user.is_authenticated %}
+                Current User: {{ current_user.username }}
+                {% endif %}
+            </a>
+
           </div>
         </div>
       </nav>
