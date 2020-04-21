@@ -49,11 +49,11 @@ class Userdata(db.Model):
         """Return True if the user is authenticated."""
         return self.authenticated
 
-    def is_blue(self):
-        return self.blue
+    ##def is_blue(self):
+        ##return self.blue
         
-    def is_red(self):
-        return self.red
+    ##def is_red(self):
+        ##return self.red
         
     def is_anonymous(self):
         """False, as anonymous users aren't supported."""
@@ -94,11 +94,9 @@ def login():
     form = LoginForm()
 
     if form.validate_on_submit():
-        #user = Userdata.query.get(form.username.data)
         user = db_session.query(Userdata).filter(Userdata.username == form.username.data).scalar()
         #password = db_session.query(Userdata).filter(Userdata.password == form.password.data).scalar()
         if user != None:
-            #if db_session.query(Userdata).filter(Userdata.password == form.)
             #if bcrypt.check_password_hash(password, form.password.data):
             if str(user.password) == str(form.password.data):
                 user.authenticated = True
@@ -110,6 +108,7 @@ def login():
             else:
                 #flash(form.password.data)
                 #flash(user.password)
+                flash('Incorrect Password')
                 return redirect('/')
         else:
             flash('User not found.')
@@ -123,7 +122,6 @@ def game():
 @app.route("/logout", methods=["GET"])
 @login_required
 def logout():
-    """Logout the current user."""
     user = current_user
     user.authenticated = False
     db_session.add(user)
