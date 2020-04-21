@@ -9,6 +9,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine, exists, table, column, Integer, ForeignKey, union_all
 from sqlalchemy.orm import scoped_session, sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
+import json
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///userDataTest.db'
@@ -17,9 +18,7 @@ app.secret_key = "password123"
 db = SQLAlchemy(app)
 
 engine = create_engine('sqlite:///userDataTest.db', convert_unicode=True)
-db_session = scoped_session(sessionmaker(autocommit=False,
-                                         autoflush=False,
-                                         bind=engine))
+db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
 Base = declarative_base()
 Base.query = db_session.query_property()
 
@@ -48,12 +47,6 @@ class Userdata(db.Model):
     def is_authenticated(self):
         """Return True if the user is authenticated."""
         return self.authenticated
-
-    ##def is_blue(self):
-        ##return self.blue
-        
-    ##def is_red(self):
-        ##return self.red
         
     def is_anonymous(self):
         """False, as anonymous users aren't supported."""
@@ -64,19 +57,19 @@ class BlueScores(db.Model):
     __tablename__ = 'blueScores'
 
     username = db.Column(db.String, primary_key=True) # db.ForeignKey('userdata.username'))
-    highScore = db.Column(db.Integer) # primary_key=True)
+    highScore = db.Column(db.Integer)
 
 class RedScores(db.Model):
 
     __tablename__ = 'redScores'
 
     username = db.Column(db.String, primary_key=True) #, db.ForeignKey('userdata.username'))
-    highScore = db.Column(db.Integer) #, primary_key=True)
+    highScore = db.Column(db.Integer)
 
 init_db()
 login_manager = LoginManager()
 login_manager.init_app(app)
-bcrypt = Bcrypt()
+#bcrypt = Bcrypt()
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -90,7 +83,10 @@ def unauthorized_callback():
 @app.route('/', methods=['GET', 'POST'])
 def login():
     
-    print(db)
+    if current_user.is_authenticated:
+        #flash('You are already logged in.')
+        return redirect('/game')
+
     form = LoginForm()
 
     if form.validate_on_submit():
@@ -103,8 +99,8 @@ def login():
                 db_session.add(user)
                 db_session.commit()
                 login_user(user, remember=True)
-                flash('Logged in!')
-                return redirect('/')
+                #flash('Logged in!')
+                return redirect('/game')
             else:
                 #flash(form.password.data)
                 #flash(user.password)
@@ -117,7 +113,13 @@ def login():
 @app.route("/game", methods=["GET"])
 @login_required
 def game():
-    return render_template("game.html")
+    
+    if current_user.blue == True:
+        user = 0
+    elif current_user.red == True:
+        user = 1
+
+    return render_template("game.html", data=json.dumps(user))
 
 @app.route("/logout", methods=["GET"])
 @login_required
@@ -145,18 +147,14 @@ def search_results(search):
     if search_string:
         
         if search.data['select'] == 'Blue':
-            qry = db_session.query(BlueScores).filter(
-                BlueScores.username.contains(search_string))
+            qry = db_session.query(BlueScores).filter(BlueScores.username.contains(search_string))
             results = qry.all()
         elif search.data['select'] == 'Red':
-            qry = db_session.query(RedScores).filter(
-                RedScores.username.contains(search_string))
+            qry = db_session.query(RedScores).filter(RedScores.username.contains(search_string))
             results = qry.all()
         elif search.data['select'] == 'All':
-            q1 = db_session.query(RedScores).filter(
-                RedScores.username.contains(search_string))
-            q2 = db_session.query(BlueScores).filter(
-                BlueScores.username.contains(search_string))
+            q1 = db_session.query(RedScores).filter(RedScores.username.contains(search_string))
+            q2 = db_session.query(BlueScores).filter(BlueScores.username.contains(search_string))
             qry = q1.union_all(q2)
             results = qry.all()
         else:
@@ -224,7 +222,7 @@ def edit():
         user.password = form.password.data
         db_session.add(user)
         db_session.commit()
-        flash('User updated successfully!')
+        flash('Password updated successfully!')
         return redirect('/')
 
     return render_template('edit_user.html', form=form)
