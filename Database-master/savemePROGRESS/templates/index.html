@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Search Scores{% endblock %}
+{% block content %}
+
+<h2>Search Scores</h2>
+
+{% from "_formhelpers.html" import render_field %}
+<form method=post>
+  <dl>
+    {{ render_field(form.select) }}
+    {{ render_field(form.search) }}
+  </dl>
+
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul class=flashes>
+      {% for message in messages %}
+        <li>{{ message }}</li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
+  <p><input type=submit class="btn btn-dark" value=Submit></button>
+</form>
+{% endblock %}

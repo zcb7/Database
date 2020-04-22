@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<div class="col-xs-4 col-xs-offset-4">
+<h2>Login</h2>
+
+{% from "_formhelpers.html" import render_field %}
+<form method=post>
+    <dl>
+        {{ form.csrf_token }}
+        {{ render_field(form.username) }}
+        {{ render_field(form.password) }}
+    </dl>
+
+    <p><p>
+    <a href="{{ url_for('.new_user') }}"> New User </a>
+    <p><p></p>
+
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul class=flashes>
+      {% for message in messages %}
+        <li>{{ message }}</li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+    {% endwith %}
+    <p></p>
+    <input type=submit class="btn btn-dark" value=Submit></button>
+</form>
+</div>
+{% endblock %}

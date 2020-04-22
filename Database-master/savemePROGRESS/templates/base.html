@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <title>{% block title %}{% endblock %}</title>
+
+    <style>
+        .container 
+        {
+           position: absolute;
+           top: 50%;
+           left: 50%;
+           width: 25em;
+           height: 23em;
+           margin-top: -11.5em;
+           margin-left: -15em;
+           border: 1px solid #ccc;
+           background-color: #f3f3f3;
+        }
+
+        .game
+        {
+            color:black;
+            
+        }
+
+        .game:hover
+        {
+            color:rgb(218, 198, 18);
+            
+        }
+
+        .game:active
+        {
+            color:rgb(218, 198, 18);
+            
+        }
+
+        .blue
+        {
+            background-image: url(https://i.imgur.com/QXu1OIP.png);
+            background-repeat: repeat;
+        }
+
+        .red
+        {
+            background-image: url(https://i.imgur.com/gKxUn5W.png);
+            background-repeat: repeat;
+        }
+
+        .default
+        {
+            /* background-image: url(http://www.theappguruz.com/app/uploads/2015/06/give-shadow.png); */
+            background-color:darkgrey;
+            background-repeat: repeat;
+        }
+    </style>
+   
+  </head>
+  
+  <body {% if current_user.blue == True %} class="blue" {% elif current_user.red == True %} class="red" {% else %} class="default" {% endif %}>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="game" href="{{ url_for('.game') }}">
+        <svg class="bi bi-plug" width="2em" height="2em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 5h8v3a4 4 0 01-8 0V5z"/>
+            <path fill-rule="evenodd" d="M6 1.5a.5.5 0 01.5.5v3a.5.5 0 01-1 0V2a.5.5 0 01.5-.5zm4 0a.5.5 0 01.5.5v3a.5.5 0 01-1 0V2a.5.5 0 01.5-.5zM7.115 13.651c.256-.511.385-1.408.385-2.651h1c0 1.257-.121 2.36-.49 3.099-.191.381-.47.707-.87.877-.401.17-.845.15-1.298-.002-.961-.32-1.534-.175-1.851.046-.33.23-.491.615-.491.98h-1c0-.635.278-1.353.918-1.8.653-.456 1.58-.561 2.74-.174.297.099.478.078.592.03.115-.05.244-.161.365-.405z" clip-rule="evenodd"/>
+          </svg>
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+          <div class="navbar-nav">
+            <a class="nav-item nav-link" href="{{ url_for('.login') }}">Login<span class="sr-only">(current)</span></a>
+            <a class="nav-item nav-link" href="{{ url_for('.logout') }}">Logout</a>
+            <a class="nav-item nav-link" href="{{ url_for('.index') }}">Search</a>
+            <a class="nav-item nav-link" href="{{ url_for('.edit') }}">Change Password</a>
+            <a class="nav-item nav-link" href="{{ url_for('.delete') }}">Delete Account</a>
+            <a class="nav-link disabled" style="color:rgb(218, 198, 18)" href="#" tabindex="-1" aria-disabled="true">
+                {% if current_user.is_authenticated %}
+                Current User: {{ current_user.username }}
+                {% endif %}
+            </a>
+
+          </div>
+        </div>
+      </nav>
+    <div class="container">
+    {% block content %}
+    {% endblock %}
+    </div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  </body>
+</html>
